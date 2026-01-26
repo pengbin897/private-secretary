@@ -1,8 +1,8 @@
-import requests
+import requests, os
 
 
 """ 阿里云百炼的API """
-api_key = "sk-90cb7ca9e5de40dd813756824f0d5fab"
+api_key = os.environ.get("DASHSCOPE_API_KEY")
 
 
 # 上传待训练的图片文件
