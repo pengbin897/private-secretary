@@ -1,0 +1,12 @@
+requests
+python-dotenv
+django==4.2
+django-filter==23.2
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.0
+mysqlclient>=2.0.1
+cnlunar
+pycryptodome
+alibabacloud-oss-v2
+langextract
+agentscope
