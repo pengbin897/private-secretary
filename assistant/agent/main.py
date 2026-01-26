@@ -1,4 +1,4 @@
-import logging, asyncio
+import os, logging, asyncio
 from agentscope.agent import ReActAgent
 from agentscope.message import Msg
 from agentscope.model import OpenAIChatModel
@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 llm = OpenAIChatModel(
     model_name="qwen-plus-2025-07-28",
-    api_key="sk-ecd3a8775842431b969fb139e1d6f4e0",
-    client_kwargs={"base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"},
+    api_key=os.environ.get("OPENAI_API_KEY"),
+    client_kwargs={"base_url": os.environ.get("OPENAI_BASE_URL")},
     stream=True,
 )
 
@@ -36,4 +36,3 @@ async def chat(user_id, user_message):
 
 if __name__ == "__main__":
     asyncio.run(chat("1234567890", "你好"))
-    
