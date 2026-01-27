@@ -24,26 +24,14 @@ class WxPublicAccountService:
         token_url = f"https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={appid}&secret={secret}"
         response = requests.get(token_url)
         return response.json()["access_token"]
-
-    def handle_wx_message(self, user_id, xml_message ):
-        msg_type = xml_message.find('MsgType').text
-        if 'event' == msg_type:
-            pass
-        elif 'text' == msg_type:
-            msg_content = xml_message.find('Content').text
-            runnable = threading.Thread(target = chat, args=(user_id, msg_content, self.send_message))
-            runnable.start()
-        else:
-            pass
-        return None
     
-    async def handle_user_message(self, user_id, user_message):
-        reply_content = await chat(user_id, user_message)
+    async def handle_user_content(self, user_id, user_content):
+        reply_content = await chat(user_id, user_content)
         self.send_message(user_id, reply_content)
 
 
     # 主动给用户发送消息
-    def send_message(self, user_id, message):
+    def send_message(self, user_id, message_content):
         access_token = self.acquire_access_token()
 
         # 构造客服消息发送请求
@@ -52,7 +40,7 @@ class WxPublicAccountService:
             "touser": user_id,
             "msgtype": "text",
             "text": {
-                "content": message
+                "content": message_content
             }
         }
         # print(data)
@@ -120,7 +108,7 @@ class WxmpRequestView(View):
             #     return HttpResponse(message_to_xml(reply_msg))
 
         else:
-            reply_content = wxmp_service.handle_wx_message(xmlMsg)
+            reply_content = wxmp_service.handle_user_content(user_id, xmlMsg.find('Content').text)
             if reply_content:
                 reply_msg['Content'] = reply_content
 
