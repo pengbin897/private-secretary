@@ -61,11 +61,12 @@ class WxPublicAccountService:
 
 
 def message_to_xml(message: dict):
-    root = ET.ElementTree('xml')
+    # 将message转换成xml格式
+    xml_str = '<xml>'
     for k,v in message.items():
-        ET.SubElement(root, k).text = v
-    
-    return ET.tostring(root, encoding='utf-8')
+        xml_str += f'<{k}>{v}</{k}>'
+    xml_str += '</xml>'
+    return xml_str
 
 
 class WxmpRequestView(View):
@@ -124,5 +125,5 @@ class WxmpRequestView(View):
                 if reply_content:
                     reply_msg['Content'] = reply_content
 
-        return HttpResponse(message_to_xml(reply_msg))
+        return HttpResponse(message_to_xml(reply_msg).encode('utf-8'))
 
