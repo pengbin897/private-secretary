@@ -1,6 +1,6 @@
 import os
 import time
-import asyncio
+import threading
 import json
 import requests
 import logging
@@ -108,9 +108,8 @@ class WxmpRequestView(View):
             #     return HttpResponse(message_to_xml(reply_msg))
 
         else:
-            reply_content = asyncio.run(wxmp_service.handle_user_content(user_id, xmlMsg.find('Content').text))
-            if reply_content:
-                reply_msg['Content'] = reply_content
+            thread = threading.Thread(target=wxmp_service.handle_user_content, args=(user_id, xmlMsg.find('Content').text))
+            thread.start()
 
         return HttpResponse(message_to_xml(reply_msg).encode('utf-8'))
 
