@@ -107,7 +107,7 @@ class WxmpRequestView(View):
         
         if not UserManageAccount.objects.filter(wx_openid=user_id).exists():
             reply_msg['Content'] = '您不是合法用户，可以联系法师（CyberMaster119）为您开通使用权限'
-            logging.warning(f"用户：{user_id} 还不是合法用户")
+            logging.warning(f"用户：\"{user_id}\" 还不是合法用户")
         else:
             wxmp_service = WxPublicAccountService()
             if msg_type == 'event':
