@@ -65,7 +65,7 @@ def message_to_xml(message: dict):
     for k,v in message.items():
         ET.SubElement(root, k).text = v
     
-    return ET.tostring(root, encoding='utf-8').decode('utf-8')
+    return ET.tostring(root, encoding='utf-8')
 
 
 class WxmpRequestView(View):
