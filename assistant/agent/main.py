@@ -11,7 +11,7 @@ from .toolkit import toolkit
 logger = logging.getLogger(__name__)
 
 llm = OpenAIChatModel(
-    model_name="qwen-plus-2025-07-28",
+    model_name=os.environ.get("OPENAI_MODEL_NAME"),
     api_key=os.environ.get("OPENAI_API_KEY"),
     client_kwargs={"base_url": os.environ.get("OPENAI_BASE_URL")},
     stream=True,
