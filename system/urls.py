@@ -11,7 +11,7 @@ app_name = "system"
 urlpatterns = [
     path("admin-site/", admin.site.urls),
     path("admin/", include('superadmin.urls')),
-    path("assistant/", include('assistant.urls')),
+    path("secretary/", include('secretary.urls')),
     
     # 下面是system应用自己的view
     path('system/auth/mocklogin', views.MockLoginView.as_view()),
