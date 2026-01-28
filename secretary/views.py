@@ -11,7 +11,6 @@ from django.views import View
 from django.views.decorators.http import require_POST
 
 from superadmin.models import UserManageAccount
-from .agent.main import chat
 from .wxmsghandle import WxMsgHandle
 
 
