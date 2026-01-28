@@ -77,7 +77,7 @@ class WxmpRequestView(View):
             #     return HttpResponse(message_to_xml(reply_msg))
 
         else:
-            WxMsgHandle().handle_user_content(user_id, xmlMsg.find('Content').text)
+            WxMsgHandle(user_id, xmlMsg.find('Content').text).start()
 
         return HttpResponse(message_to_xml(reply_msg).encode('utf-8'))
 

@@ -24,39 +24,47 @@ class MessageHandle:
             raise RuntimeError("Background loop not running")
 
 
-class WxMsgHandle:
-    # 获取access_token
-    def acquire_access_token(self):
-        appid = os.environ.get('WECHAT_APPID')
-        secret = os.environ.get('WECHAT_APPSECRET')
-        token_url = f"https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={appid}&secret={secret}"
-        response = requests.get(token_url)
-        return response.json()["access_token"]
+class WxMsgHandle(threading.Thread):
+    def __init__(self, user_id, user_content):
+        super().__init__()
+        self.daemon = True
+        self.user_id = user_id
+        self.user_content = user_content
 
-    # 主动给用户发送消息
-    def send_message(self, user_id, message_content):
-        access_token = self.acquire_access_token()
+    def run(self):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            loop.run_until_complete(handle_user_content(self.user_id, self.user_content))
+        finally:
+            loop.close()
 
-        # 构造客服消息发送请求
-        request_url = f"https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token={access_token}"
-        data = {
-            "touser": user_id,
-            "msgtype": "text",
-            "text": {
-                "content": message_content
-            }
+# 获取access_token
+def acquire_access_token():
+    appid = os.environ.get('WECHAT_APPID')
+    secret = os.environ.get('WECHAT_APPSECRET')
+    token_url = f"https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={appid}&secret={secret}"
+    response = requests.get(token_url)
+    return response.json()["access_token"]
+
+# 主动给用户发送消息
+def send_message(user_id, message_content):
+    access_token = acquire_access_token()
+
+    # 构造客服消息发送请求
+    request_url = f"https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token={access_token}"
+    data = {
+        "touser": user_id,
+        "msgtype": "text",
+        "text": {
+            "content": message_content
         }
-        # print(data)
-        response = requests.post(request_url, data=bytes(json.dumps(data, ensure_ascii=False), encoding="utf-8"))
-        # print(response.json())
+    }
+    # print(data)
+    response = requests.post(request_url, data=bytes(json.dumps(data, ensure_ascii=False), encoding="utf-8"))
+    # print(response.json())
 
-    def handle_user_content(self, user_id, user_content):
-        def run():
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            try:
-                loop.run_until_complete(chat(user_id, user_content))
-            finally:
-                loop.close()
-        thread = threading.Thread(target=run, daemon=True)
-        thread.start()
+async def handle_user_content(user_id, user_content):
+    reply_content = await chat(user_id, user_content)
+    send_message(user_id, reply_content)
+
