@@ -12,40 +12,10 @@ from django.views.decorators.http import require_POST
 
 from superadmin.models import UserManageAccount
 from .agent.main import chat
+from .wxmsghandle import WxMsgHandle
 
 
 logger = logging.getLogger(__name__)
-
-class WxPublicAccountService:
-    # 获取access_token
-    def acquire_access_token(self):
-        appid = os.environ.get('WECHAT_APPID')
-        secret = os.environ.get('WECHAT_APPSECRET')
-        token_url = f"https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={appid}&secret={secret}"
-        response = requests.get(token_url)
-        return response.json()["access_token"]
-    
-    async def handle_user_content(self, user_id, user_content):
-        reply_content = await chat(user_id, user_content)
-        self.send_message(user_id, reply_content)
-
-
-    # 主动给用户发送消息
-    def send_message(self, user_id, message_content):
-        access_token = self.acquire_access_token()
-
-        # 构造客服消息发送请求
-        request_url = f"https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token={access_token}"
-        data = {
-            "touser": user_id,
-            "msgtype": "text",
-            "text": {
-                "content": message_content
-            }
-        }
-        # print(data)
-        response = requests.post(request_url, data=bytes(json.dumps(data, ensure_ascii=False), encoding="utf-8"))
-        # print(response.json())
 
 
 def message_to_xml(message: dict):
@@ -96,7 +66,6 @@ class WxmpRequestView(View):
         #     reply_msg['Content'] = '您不是合法用户，可以联系法师（CyberMaster119）为您开通使用权限'
         #     logging.warning(f"用户：\"{user_id}\" 还不是合法用户")
         # else:
-        wxmp_service = WxPublicAccountService()
         if msg_type == 'event':
             event = xmlMsg.find('Event').text
             logger.info(f"收到公众号后台的事件：{event}")
@@ -108,8 +77,8 @@ class WxmpRequestView(View):
             #     return HttpResponse(message_to_xml(reply_msg))
 
         else:
-            thread = threading.Thread(target=wxmp_service.handle_user_content, args=(user_id, xmlMsg.find('Content').text))
-            thread.start()
+            WxMsgHandle().handle_user_content(user_id, xmlMsg.find('Content').text)
 
         return HttpResponse(message_to_xml(reply_msg).encode('utf-8'))
+
 

@@ -3,6 +3,14 @@
 import os
 import sys
 
+def create_user(username, password):
+    from django.contrib.auth.models import User
+    from superadmin.models import UserManageAccount
+
+    user = User.objects.create_user(username=username, password=password)
+    UserManageAccount.objects.create(user=user)
+    return user
+
 
 def main():
     
@@ -19,8 +27,15 @@ def main():
     if "--development" in sys.argv:
         os.environ["DEVELOPMENT_MODE"] = "True"
         sys.argv.remove("--development")
+    # 自定义的命令
+    if "createuser" == sys.argv[1]:
+        username = sys.argv[2]
+        password = sys.argv[3]
+        execute_from_command_line(["manage.py", "runserver", "8080"])
+        create_user(username, password)
+        print(f"User \"{username}\" created successfully")
+        return
     execute_from_command_line(sys.argv)
-
 
 if __name__ == '__main__':
     main()

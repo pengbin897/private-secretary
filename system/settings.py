@@ -23,7 +23,7 @@ INSTALLED_APPS = [
 
     'system',      # 处理应用请求的后端
     'superadmin',  # 后台管理控制台
-    'assistant',
+    'secretary',
 ]
 
 DATABASES = {
