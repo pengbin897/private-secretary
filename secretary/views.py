@@ -61,22 +61,23 @@ class WxmpRequestView(View):
             'Content': ''  # 默认回复一个空消息，避免微信公众号提示“该公众号暂时无法提供服务，请稍后再试”
         }
         # 判断用户是否合法用户，再根据用户的功能模式进行对应的处理
-        # if not UserManageAccount.objects.filter(wx_openid=user_id).exists():
-        #     reply_msg['Content'] = '您不是合法用户，可以联系法师（CyberMaster119）为您开通使用权限'
-        #     logging.warning(f"用户：\"{user_id}\" 还不是合法用户")
-        # else:
-        if msg_type == 'event':
-            event = xmlMsg.find('Event').text
-            logger.info(f"收到公众号后台的事件：{event}")
-            # 菜单点击事件
-            # if event == 'CLICK':
-            #     event_key = xmlMsg.find('EventKey').text
-            #     userRepo.setUserFeature(user_id, convertFeatureString(event_key))
-            #     reply_msg['Content'] = '切换成功'
-            #     return HttpResponse(message_to_xml(reply_msg))
-
+        if not UserManageAccount.objects.filter(wx_openid=user_id).exists():
+            reply_msg['Content'] = '您不是合法用户，可以联系法师（CyberMaster119）为您开通使用权限'
+            logging.warning(f"用户：\"{user_id}\" 还不是合法用户")
         else:
-            WxMsgHandle(user_id, xmlMsg.find('Content').text).start()
+            if msg_type == 'event':
+                event = xmlMsg.find('Event').text
+                logger.info(f"收到公众号后台的事件：{event}")
+                # 菜单点击事件
+                # if event == 'CLICK':
+                #     event_key = xmlMsg.find('EventKey').text
+                #     userRepo.setUserFeature(user_id, convertFeatureString(event_key))
+                #     reply_msg['Content'] = '切换成功'
+                #     return HttpResponse(message_to_xml(reply_msg))
+
+            else:
+                print(f"收到用户[{user_id}]的消息：{xmlMsg.find('Content').text}, 回复一个空消息")
+                # WxMsgHandle(user_id, xmlMsg.find('Content').text).start()
 
         return HttpResponse(message_to_xml(reply_msg).encode('utf-8'))
 
