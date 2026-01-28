@@ -1,9 +1,9 @@
 import threading, asyncio
 import os, json, requests
-from .agent.main import WxsecretaryAgent
+from .agent.main import agent_main
 
 
-class WxMsgHandle(threading.Thread):
+class WxMsgHandleRunner(threading.Thread):
     def __init__(self, user_id, user_content):
         super().__init__()
         self.daemon = True
@@ -44,7 +44,6 @@ def send_message(user_id, message_content):
     # print(response.json())
 
 async def handle_user_content(user_id, user_content):
-    secretary_agent = WxsecretaryAgent(user_id)
-    reply_content = await secretary_agent.chat(user_content)
+    reply_content = await agent_main(user_id, user_content)
     send_message(user_id, reply_content)
 

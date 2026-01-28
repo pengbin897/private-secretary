@@ -1,8 +1,4 @@
-import os
 import time
-import threading
-import json
-import requests
 import logging
 import xml.etree.ElementTree as ET
 
@@ -11,7 +7,7 @@ from django.views import View
 from django.views.decorators.http import require_POST
 
 from superadmin.models import UserManageAccount
-from .wxmsghandle import WxMsgHandle
+from .wxmsg_handle import WxMsgHandleRunner
 
 
 logger = logging.getLogger(__name__)
@@ -76,8 +72,8 @@ class WxmpRequestView(View):
                 #     return HttpResponse(message_to_xml(reply_msg))
 
             else:
-                print(f"收到用户[{user_id}]的消息：{xmlMsg.find('Content').text}, 回复一个空消息")
-                # WxMsgHandle(user_id, xmlMsg.find('Content').text).start()
+                # print(f"收到用户[{user_id}]的消息：{xmlMsg.find('Content').text}, 回复一个空消息")
+                WxMsgHandleRunner(user_id, xmlMsg.find('Content').text).start()
 
         return HttpResponse(message_to_xml(reply_msg).encode('utf-8'))
 
