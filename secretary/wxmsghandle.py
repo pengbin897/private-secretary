@@ -60,17 +60,3 @@ class WxMsgHandle:
                 loop.close()
         thread = threading.Thread(target=run, daemon=True)
         thread.start()
-
-    def send_message(self, user_id, message_content):
-        access_token = self.acquire_access_token()
-        request_url = f"https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token={access_token}"
-        data = {
-            "touser": user_id,
-            "msgtype": "text",
-            "text": {
-                "content": message_content
-            }
-        }
-        # print(data)
-        response = requests.post(request_url, data=bytes(json.dumps(data, ensure_ascii=False), encoding="utf-8"))
-        # print(response.json())
