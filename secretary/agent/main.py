@@ -22,7 +22,7 @@ agent = ReActAgent(
     name="assistant",
     model=llm,
     sys_prompt="你是一个助手，请根据用户的问题给出回答。",
-    formatter=OpenAIChatFormatter,
+    formatter=OpenAIChatFormatter(),
     memory=InMemoryMemory(),
     toolkit=toolkit
 )
