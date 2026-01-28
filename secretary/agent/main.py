@@ -1,18 +1,18 @@
-import os, logging, asyncio
+import os, logging
+from datetime import datetime
 from agentscope.agent import ReActAgent
 from agentscope.message import Msg
 from agentscope.model import OpenAIChatModel
 from agentscope.memory import InMemoryMemory
 from agentscope.formatter import OpenAIChatFormatter
-from datetime import datetime
 from agentscope.tool import Toolkit, ToolResponse
 
 
 logger = logging.getLogger(__name__)
 
-SYS_PROMPT = """
+SYS_PROMPT = f"""
 你是一个私人助理，你的主要工作是协助用户进行日程管理。
-如果涉及到日期时间的记录，请务必调用代码获取当前时间作为日期的参考。
+当前时间为:{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}。
 """
 
 async def agent_main(user_id: str, user_message: str):
