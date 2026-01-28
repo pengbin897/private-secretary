@@ -4,35 +4,83 @@ from agentscope.message import Msg
 from agentscope.model import OpenAIChatModel
 from agentscope.memory import InMemoryMemory
 from agentscope.formatter import OpenAIChatFormatter
-
-from .toolkit import toolkit
+from datetime import datetime
+from agentscope.tool import Toolkit, ToolResponse
 
 
 logger = logging.getLogger(__name__)
 
-llm = OpenAIChatModel(
-    model_name=os.environ.get("OPENAI_MODEL_NAME"),
-    api_key=os.environ.get("OPENAI_API_KEY"),
-    client_kwargs={"base_url": os.environ.get("OPENAI_BASE_URL")},
-    stream=True,
-)
+SYS_PROMPT = """
+你是一个私人助理，你的主要工作是协助用户进行日程管理
+"""
+class WxsecretaryAgent:
+
+    def __init__(self, user_id) -> None:
+        self.user_id = user_id
+        llm = OpenAIChatModel(
+            model_name=os.environ.get("OPENAI_MODEL_NAME"),
+            api_key=os.environ.get("OPENAI_API_KEY"),
+            client_kwargs={"base_url": os.environ.get("OPENAI_BASE_URL")},
+            stream=True,
+        )
+        toolkit = Toolkit()
+        toolkit.register_tool_function(self.add_schedule)
+        # toolkit.register_tool_function(delete_schedule)
+        # toolkit.register_tool_function(get_schedule_list)
+        # toolkit.register_tool_function(get_schedule_detail)
+
+        self.agent = ReActAgent(
+            name="secretary",
+            model=llm,
+            sys_prompt=SYS_PROMPT,
+            formatter=OpenAIChatFormatter(),
+            memory=InMemoryMemory(),
+            toolkit=toolkit
+        )
+
+    def add_schedule(self, content: str, fire_time: datetime) -> ToolResponse:
+        """
+        添加一条待办日程
+        Args:
+            content(str): {待办/日程事项的详细内容}
+            fire_time(datetime): {事项设定的触发时间}
+        """
+        # UserSchedule.objects.create(
+        #     content=content,
+        #     fire_time=fire_time
+        # )
+        print(f"给用户[{self.user_id}]添加一条日程信息：{content}，触发时间：{fire_time}")
+        return ToolResponse(
+            content=f"已添加一条日程信息：{content}，触发时间：{fire_time}"
+        )
 
 
-agent = ReActAgent(
-    name="assistant",
-    model=llm,
-    sys_prompt="你是一个助手，请根据用户的问题给出回答。",
-    formatter=OpenAIChatFormatter(),
-    memory=InMemoryMemory(),
-    toolkit=toolkit
-)
+    def delete_schedule(self, ) -> ToolResponse:
+        """
+        删除一条日程待办
+        Args:
+            content(str): {待办/日程事项的详细内容}
+            fire_time(datetime): {事项设定的触发时间}
+        """
+        return ToolResponse(
+            content=""
+        )
 
 
-async def chat(user_id, user_message):
-    msg = Msg(name=user_id, role="user", content=user_message)
-    reply = await agent(msg)
-    return reply.get_text_content()
+    def get_schedule_list(self, ) -> ToolResponse:
+        return ToolResponse(
+            content=""
+        )
 
 
-if __name__ == "__main__":
-    asyncio.run(chat("1234567890", "你好"))
+    def get_schedule_detail(self, ) -> ToolResponse:
+        return ToolResponse(
+            content=""
+        )
+
+
+    async def chat(self, user_message):
+        msg = Msg(name=self.user_id, role="user", content=user_message)
+        reply = await self.agent(msg)
+        return reply.get_text_content()
+

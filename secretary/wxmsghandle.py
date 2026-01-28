@@ -1,27 +1,6 @@
 import threading, asyncio
 import os, json, requests
-from .agent.main import chat
-
-
-class MessageHandle:
-    def __init__(self):
-        self.loop = None
-        self.thread = None
-
-    def start(self):
-        def run_loop():
-            self.loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self.loop)
-            self.loop.run_forever()
-
-        self.thread = threading.Thread(target=run_loop, daemon=True)
-        self.thread.start()
-
-    def submit_coro(self, coro):
-        if self.loop and self.loop.is_running():
-            asyncio.run_coroutine_threadsafe(coro, self.loop)
-        else:
-            raise RuntimeError("Background loop not running")
+from .agent.main import WxsecretaryAgent
 
 
 class WxMsgHandle(threading.Thread):
@@ -65,6 +44,7 @@ def send_message(user_id, message_content):
     # print(response.json())
 
 async def handle_user_content(user_id, user_content):
-    reply_content = await chat(user_id, user_content)
+    secretary_agent = WxsecretaryAgent(user_id)
+    reply_content = await secretary_agent.chat(user_content)
     send_message(user_id, reply_content)
 
