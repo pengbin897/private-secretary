@@ -65,12 +65,10 @@ class WxmpRequestView(View):
                 event = xmlMsg.find('Event').text
                 logger.info(f"收到公众号后台的事件：{event}")
                 # 菜单点击事件
-                # if event == 'CLICK':
-                #     event_key = xmlMsg.find('EventKey').text
-                #     userRepo.setUserFeature(user_id, convertFeatureString(event_key))
-                #     reply_msg['Content'] = '切换成功'
-                #     return HttpResponse(message_to_xml(reply_msg))
-
+                if event == 'CLICK':
+                    event_key = xmlMsg.find('EventKey').text
+                    # 查看所有待办日程的网页
+                    
             else:
                 # print(f"收到用户[{user_id}]的消息：{xmlMsg.find('Content').text}, 回复一个空消息")
                 WxMsgHandleRunner(user_id, xmlMsg.find('Content').text).start()
