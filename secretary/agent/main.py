@@ -14,6 +14,7 @@ SYS_PROMPT = f"""
 你是一个私人助理，你的主要工作是协助用户进行日程管理。
 当前时间为:{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}。
 """
+memory = InMemoryMemory()
 
 async def agent_main(user_id: str, user_message: str):
     def add_schedule(content: str, fire_time: datetime) -> ToolResponse:
@@ -70,7 +71,7 @@ async def agent_main(user_id: str, user_message: str):
         model=llm,
         sys_prompt=SYS_PROMPT,
         formatter=OpenAIChatFormatter(),
-        memory=InMemoryMemory(),
+        memory=memory,
         toolkit=toolkit
     )
     msg = Msg(name=user_id, role="user", content=user_message)

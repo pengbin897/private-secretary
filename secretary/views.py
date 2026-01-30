@@ -4,10 +4,9 @@ import xml.etree.ElementTree as ET
 
 from django.http import HttpRequest, HttpResponse
 from django.views import View
-from django.views.decorators.http import require_POST
 
 from superadmin.models import UserManageAccount
-from .wxmsg_handle import WxMsgHandleRunner
+from .wxmsg_handle import WxMsgHandleRunner, send_message
 
 
 logger = logging.getLogger(__name__)
@@ -22,7 +21,7 @@ def message_to_xml(message: dict):
     return xml_str
 
 
-class WxmpRequestView(View):
+class WxampRequestView(View):
     def get(self, request: HttpRequest) -> HttpResponse:
         ''' 微信验证 '''
         echostr = request.GET.get("echostr")
@@ -76,3 +75,8 @@ class WxmpRequestView(View):
         return HttpResponse(message_to_xml(reply_msg).encode('utf-8'))
 
 
+class WxampNotifyUserView(View):
+    def post(self, request: HttpRequest, user_id: str) -> HttpResponse:
+        message = request.body.decode('utf-8')
+        send_message(user_id, message)
+        return HttpResponse(status=200)

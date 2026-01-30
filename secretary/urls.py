@@ -3,5 +3,6 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
-    path("wxmp_request", WxmpRequestView.as_view())
+    path("wxamp_request", WxampRequestView.as_view()),
+    path("wxamp_notify/<str:user_id>", WxampNotifyUserView.as_view()),
 ]

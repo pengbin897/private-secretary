@@ -14,5 +14,7 @@ urlpatterns = [
     path('sys/datamodel/list', views.SysDataModelListView.as_view()),
     path('sys/datamodel', views.SysDataModelView.as_view()),
 
+    path('secretary/memory', views.UserMemoryView.as_view()),
+    path('secretary/memory/<str:user>', views.UserMemoryView.as_view()),
 ]
 

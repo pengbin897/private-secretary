@@ -10,11 +10,15 @@ class WxMsgHandleRunner(threading.Thread):
         self.user_id = user_id
         self.user_content = user_content
 
+    async def handler_func(self):
+        reply_content = await agent_main(self.user_id, self.user_content)
+        send_message(self.user_id, reply_content)
+
     def run(self):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:
-            loop.run_until_complete(handle_user_content(self.user_id, self.user_content))
+            loop.run_until_complete(self.handler_func())
         finally:
             loop.close()
 
@@ -43,7 +47,4 @@ def send_message(user_id, message_content):
     response = requests.post(request_url, data=bytes(json.dumps(data, ensure_ascii=False), encoding="utf-8"))
     # print(response.json())
 
-async def handle_user_content(user_id, user_content):
-    reply_content = await agent_main(user_id, user_content)
-    send_message(user_id, reply_content)
 
