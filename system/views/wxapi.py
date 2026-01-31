@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from system.infra.services import wxjsdkservice, wxmpservice
+from system.infra.adaptor.implatform.wechat import wxjsdk, wxamp
 
 
 class WxJsdkConfigView(APIView):
@@ -16,8 +16,8 @@ class WxJsdkConfigView(APIView):
         real_url = base64.b64decode(url).decode()
         print(f'the real url is {real_url}')
         # 先获取access_token，再获取jsapi_ticket
-        access_token = wxmpservice.acquire_access_token()
-        jsapi_ticket = wxjsdkservice.get_jsapi_ticket(access_token)
+        access_token = wxamp.acquire_access_token()
+        jsapi_ticket = wxjsdk.get_jsapi_ticket(access_token)
 
         # 生成签名
         timestamp = int(time.time())

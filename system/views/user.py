@@ -17,7 +17,7 @@ from rest_framework import status
 
 from system.infra.common.constant import UserChannel
 from superadmin.models import UserManageAccount
-from system.infra.services import wxmpservice, wxampservice
+from system.infra.adaptor.implatform.wechat import wxjsdk, miniprogram
 from superadmin.services import account
 
 
@@ -141,12 +141,12 @@ class WechatAuthLoginView(APIView):
             }
         else:
             # 检验是否由平台发起的一个随机串, 这里暂时先把secret写死成小及公众号的
-            token_result = wxampservice.oauth_access_token(code)
+            token_result = wxjsdk.oauth_access_token(code)
             if 'errcode' in token_result:
                 logger.error(f'获取微信授权失败: {token_result["errmsg"]}')
                 return Response({'message': '获取微信授权失败'}, status=401)
             # 获取用户信息
-            user_info = wxampservice.get_user_info(token_result['access_token'], token_result['openid'])
+            user_info = wxjsdk.get_user_info(token_result['access_token'], token_result['openid'])
             if 'errcode' in user_info:
                 logger.error(f'获取微信用户信息失败: {user_info["errmsg"]}')
                 return Response({'message': '获取微信用户信息失败'}, status=401)
@@ -196,7 +196,7 @@ class WxMiniprogramLoginView(APIView):
     permission_classes = []
     def post(self, request: Request) -> Response:
         code = request.query_params.get('code')
-        user_state = wxmpservice.get_user_state(code)
+        user_state = miniprogram.get_user_state(code)
         if not user_state:
             return Response({'message': '获取用户状态失败'}, status=401)
         
@@ -270,28 +270,5 @@ class LogoutView(APIView):
                 'error': '登出过程中发生错误'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-class UserRechargeView(APIView):
-    ''' 用户充值 '''
-    def post(self, request: Request) -> Response:
-        user = request.user
-        amount = request.data.get('amount')
-        user_account = UserManageAccount.objects.filter(user__id=user.id).get()
-        if not user_account.wx_openid:
-            return Response({'code': 400, 'message': '请先绑定微信'})
-        # 根据用户ID、时间戳生成一个随机数的订单编号，尽可能保证唯一
-        order_no = f'LGTOOL{int(time.time())}{random.randint(1000, 9999)}'
-        # 根据用户判断是公众号还是小程序下单
-        if user_account.channel == UserChannel.WECHAT_H5:
-            trade = wxampservice.create_pay_order('自助充值', order_no, amount, user_account.wx_openid)
-        elif user_account.channel == UserChannel.WECHAT_MINI_PROGRAM:
-            trade = wxmpservice.create_pay_order('自助充值', order_no, amount, user_account.wx_openid)
-        else:
-            return Response({'message': '支付方式错误'}, status.HTTP_400_BAD_REQUEST)
-        if not trade:
-            return Response({'message': '支付订单创建失败'}, status.HTTP_503_SERVICE_UNAVAILABLE)
-        # 记录订单信息
-        # UserOrder.objects.create(owner=user, order_no=order_no, amount=amount, trade_no=trade['prepay_id'], payer=user_account.wx_openid)
-        return Response(trade)
 
 

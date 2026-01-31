@@ -29,6 +29,5 @@ urlpatterns = [
     path('wxpay/notify', views.OrderPayNotifyFromWechatView.as_view()),
 
     path('system/menu/list', views.SysMenuListView.as_view()),
-    path('system/user/recharge', views.UserRechargeView.as_view()),
     path('system/modelscope/token', views.ModelscopeTokenView.as_view()),
 ]
