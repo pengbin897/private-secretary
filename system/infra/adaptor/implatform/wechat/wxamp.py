@@ -33,3 +33,14 @@ def send_message_to_user(openid, message_content):
     # print(data)
     response = requests.post(request_url, data=bytes(json.dumps(data, ensure_ascii=False), encoding="utf-8"))
     # print(response.json())
+
+# 修改菜单
+def submit_menu(menu: dict):
+    access_token = acquire_access_token()
+    request_url = f"https://api.weixin.qq.com/cgi-bin/menu/create?access_token={access_token}"
+    response = requests.post(request_url, data=bytes(json.dumps(menu, ensure_ascii=False), encoding="utf-8"))
+    errcode = response.json().get('errcode')
+    if errcode:
+        logger.warning(f'submit weixin menu failed, errcode: {errcode}, errmsg: {response.json().get("errmsg")}')
+        return None
+    return response.json()

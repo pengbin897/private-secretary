@@ -4,23 +4,14 @@ import xml.etree.ElementTree as ET
 
 from django.http import HttpRequest, HttpResponse
 from django.views import View
+from django.views.decorators.http import require_POST
 
 from superadmin.models import UserManageAccount
-from system.infra.adaptor.implatform.wechat.wxamp import send_message_to_user
+from system.infra.adaptor.implatform.wechat.wxamp import send_message_to_user, submit_menu
 from .channel_adaptor import handle_wxmessage_async
 
 
 logger = logging.getLogger(__name__)
-
-
-def message_to_xml(message: dict):
-    # 将message转换成xml格式
-    xml_str = '<xml>'
-    for k,v in message.items():
-        xml_str += f'<{k}>{v}</{k}>'
-    xml_str += '</xml>'
-    return xml_str
-
 
 class WxampRequestView(View):
     def get(self, request: HttpRequest) -> HttpResponse:
@@ -73,7 +64,15 @@ class WxampRequestView(View):
                 # print(f"收到用户[{user_id}]的消息：{xmlMsg.find('Content').text}, 回复一个空消息")
                 handle_wxmessage_async(user_id, xmlMsg.find('Content').text)
 
-        return HttpResponse(message_to_xml(reply_msg).encode('utf-8'))
+        return HttpResponse(self.message_to_xml(reply_msg).encode('utf-8'))
+
+    def message_to_xml(self, message: dict):
+        # 将message转换成xml格式
+        xml_str = '<xml>'
+        for k,v in message.items():
+            xml_str += f'<{k}>{v}</{k}>'
+        xml_str += '</xml>'
+        return xml_str
 
 
 class WxampNotifyUserView(View):
@@ -81,3 +80,10 @@ class WxampNotifyUserView(View):
         message = request.body.decode('utf-8')
         send_message_to_user(user_id, message)
         return HttpResponse(status=200)
+
+@require_POST
+def submit_menus(request):
+    menu = request.data
+    submit_menu(menu)
+    return HttpResponse(status=200)
+
