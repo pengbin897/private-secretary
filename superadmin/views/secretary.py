@@ -6,8 +6,9 @@ from secretary.agent.secretary import memory as secretary_memory
 
 
 class UserMemoryView(APIView):
-    # permission_classes = [IsAdminUser]
-    def get(self, request: Request, user: str) -> Response:
+    authentication_classes = []
+    permission_classes = []
+    def get(self, request: Request, user: str=None) -> Response:
         # user 是微信用户的openid
         
         return Response(secretary_memory.state_dict())
