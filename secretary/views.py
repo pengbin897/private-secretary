@@ -83,7 +83,7 @@ class WxampNotifyUserView(View):
 
 @require_POST
 def submit_menus(request: HttpRequest):
-    menu = request.body
+    menu = request.body.decode('utf-8')
     submit_menu(json.loads(menu))
     return HttpResponse(status=200)
 
