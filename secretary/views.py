@@ -1,4 +1,4 @@
-import time
+import time, json
 import logging
 import xml.etree.ElementTree as ET
 
@@ -82,8 +82,8 @@ class WxampNotifyUserView(View):
         return HttpResponse(status=200)
 
 @require_POST
-def submit_menus(request):
-    menu = request.data
-    submit_menu(menu)
+def submit_menus(request: HttpRequest):
+    menu = request.body
+    submit_menu(json.loads(menu))
     return HttpResponse(status=200)
 
