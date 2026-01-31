@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-from common.constant import UserChannel
+from system.infra.common.constant import UserChannel
 
 
 # 管理端的数据模型，不需要租户属性

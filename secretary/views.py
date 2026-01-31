@@ -6,7 +6,8 @@ from django.http import HttpRequest, HttpResponse
 from django.views import View
 
 from superadmin.models import UserManageAccount
-from .wxmsg_handle import WxMsgHandleRunner, send_message
+from system.infra.adaptor.implatform.wechat.wxamp import send_message_to_user
+from .channel_adaptor import handle_wxmessage_async
 
 
 logger = logging.getLogger(__name__)
@@ -70,7 +71,7 @@ class WxampRequestView(View):
                     
             else:
                 # print(f"收到用户[{user_id}]的消息：{xmlMsg.find('Content').text}, 回复一个空消息")
-                WxMsgHandleRunner(user_id, xmlMsg.find('Content').text).start()
+                handle_wxmessage_async(user_id, xmlMsg.find('Content').text)
 
         return HttpResponse(message_to_xml(reply_msg).encode('utf-8'))
 
@@ -78,5 +79,5 @@ class WxampRequestView(View):
 class WxampNotifyUserView(View):
     def post(self, request: HttpRequest, user_id: str) -> HttpResponse:
         message = request.body.decode('utf-8')
-        send_message(user_id, message)
+        send_message_to_user(user_id, message)
         return HttpResponse(status=200)

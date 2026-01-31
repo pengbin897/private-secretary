@@ -1,6 +1,6 @@
 from django.db import models
 
-from common.mixin import TenantModelMixin
+from system.infra.common.mixin import TenantModelMixin
 
 
 class UserSchedule(TenantModelMixin):

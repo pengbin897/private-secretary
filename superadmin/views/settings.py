@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
 
 from system.models import SysMenuSettings, DataModelDict
-from common.result import page_success, success
+from system.infra.common.result import page_success, success
 
 
 class MenuListQueryView(APIView):

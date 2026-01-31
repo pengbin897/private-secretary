@@ -9,12 +9,12 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from common.constant import UserChannel
-from system.framework.services import wxampservice
+from system.infra.common.constant import UserChannel
+from system.infra.adaptor.implatform.wechat import wxjsdk
 from superadmin.models import UserManageAccount
 
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
 
 class CookieTokenRefreshSerializer(TokenRefreshSerializer):
     """从httpOnly cookie中获取refresh token的序列化器，复用TokenRefreshSerializer的所有逻辑"""
@@ -122,7 +122,7 @@ class WexinTokenAuthentication(BaseAuthentication):
                 credential = json.loads(user_account.credential)
                 if not credential.get('access_token'):
                     return None
-                verify_result = wxampservice.verify_access_token(credential['access_token'], user_account.wx_openid)
+                verify_result = wxjsdk.verify_access_token(credential['access_token'], user_account.wx_openid)
                 if not verify_result:
                     # 从request cookie中获取refresh_token
                     # refresh_token = request.COOKIES.get('refresh_token')

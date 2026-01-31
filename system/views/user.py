@@ -15,9 +15,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework import status
 
-from common.constant import UserChannel
+from system.infra.common.constant import UserChannel
 from superadmin.models import UserManageAccount
-from system.framework.services import wxmpservice, wxampservice
+from system.infra.services import wxmpservice, wxampservice
 from superadmin.services import account
 
 

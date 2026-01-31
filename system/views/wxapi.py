@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from system.framework.services import wxjsdkservice, wxmpservice
+from system.infra.services import wxjsdkservice, wxmpservice
 
 
 class WxJsdkConfigView(APIView):

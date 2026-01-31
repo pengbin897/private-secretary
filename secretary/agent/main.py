@@ -16,7 +16,7 @@ SYS_PROMPT = f"""
 """
 memory = InMemoryMemory()
 
-async def agent_main(user_id: str, user_message: str):
+async def agent_main(user_id: str, user_message: str, reply_hook: callable):
     def add_schedule(content: str, fire_time: datetime) -> ToolResponse:
         """
         添加一条待办日程
@@ -76,4 +76,4 @@ async def agent_main(user_id: str, user_message: str):
     )
     msg = Msg(name=user_id, role="user", content=user_message)
     reply = await agent(msg)
-    return reply.get_text_content()
+    reply_hook(reply.get_text_content())

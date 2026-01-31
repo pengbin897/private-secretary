@@ -78,8 +78,8 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'system.auth.CustomJWTAuthentication',
-        'system.auth.WexinTokenAuthentication',
+        'system.infra.auth.CustomJWTAuthentication',
+        'system.infra.auth.WexinTokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -90,8 +90,8 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60*6),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     'UPDATE_LAST_LOGIN': True,  # 更新最后登录时间
-    'TOKEN_OBTAIN_SERIALIZER': 'system.auth.CustomTokenObtainSerializer',
-    'TOKEN_REFRESH_SERIALIZER': 'system.auth.CookieTokenRefreshSerializer'
+    'TOKEN_OBTAIN_SERIALIZER': 'system.infra.auth.CustomTokenObtainSerializer',
+    'TOKEN_REFRESH_SERIALIZER': 'system.infra.auth.CookieTokenRefreshSerializer'
 }
 
 
