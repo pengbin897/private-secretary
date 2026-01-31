@@ -120,23 +120,7 @@ LOGGING = {
             'handlers': ['console', 'file'],
             'level': 'DEBUG' if os.environ.get('DEV_MODE') else 'INFO',
         },
-        'ninetype': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG' if os.environ.get('DEV_MODE') else 'INFO',
-        },
-        'digishow': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG' if os.environ.get('DEV_MODE') else 'INFO',
-        },
-        'superadmin': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG' if os.environ.get('DEV_MODE') else 'INFO',
-        },
-        'system': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG' if os.environ.get('DEV_MODE') else 'INFO',
-        },
-        'lgtools': {
+        'secretary': {
             'handlers': ['console', 'file'],
             'level': 'DEBUG' if os.environ.get('DEV_MODE') else 'INFO',
         },
