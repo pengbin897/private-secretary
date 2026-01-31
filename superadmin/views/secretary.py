@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from secretary.agent.main import memory as secretary_memory
+from secretary.agent.secretary import memory as secretary_memory
 
 
 class UserMemoryView(APIView):
