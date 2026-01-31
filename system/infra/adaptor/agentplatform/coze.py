@@ -4,11 +4,11 @@ import time
 from cozepy import COZE_CN_BASE_URL
 from cozepy import Coze, TokenAuth, Message, ChatStatus, MessageType
 
-coze_api_token = os.environ.get('COZE_API_TOKEN')
-bot_id = os.environ.get('COZE_BOT_ID')
 user_id = 'pengbin119'
 
 def chat(query: str) -> str:
+    coze_api_token = os.environ.get('COZE_API_TOKEN')
+    bot_id = os.environ.get('COZE_BOT_ID')
     coze = Coze(auth=TokenAuth(token=coze_api_token), base_url=COZE_CN_BASE_URL)
 
     chat_poll = coze.chat.create_and_poll(
