@@ -1,5 +1,5 @@
 import threading, asyncio
-from .agent.main import agent_main
+from .agent.projbot import agent_main
 from system.infra.adaptor.implatform.wechat.wxamp import send_message_to_user
 
 
@@ -16,5 +16,4 @@ def handle_wxmessage_async(user_id, user_content):
             loop.close()
 
     threading.Thread(target=handle_wxmessage).start()
-
 

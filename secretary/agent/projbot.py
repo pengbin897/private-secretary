@@ -1,5 +1,5 @@
 ''' 标书助理 '''
-import os, requests, logging
+import io, requests, logging, re
 import pandas as pd
 import urllib.parse
 from bs4 import BeautifulSoup
@@ -7,6 +7,8 @@ from bs4 import BeautifulSoup
 from agentscope.agent import ReActAgent
 from agentscope.model import DashScopeChatModel
 from agentscope.formatter import DashScopeChatFormatter
+
+from system.infra.adaptor.agentplatform import coze
 
 
 logger = logging.getLogger(__name__)
@@ -38,7 +40,6 @@ https://gdgpo.czt.gd.gov.cn/maincms-web/noticeGd?type=notice&id=ebf51db8-c29a-42
 https://gdgpo.czt.gd.gov.cn/maincms-web/noticeGd?type=notice&id=232eb4aa-426a-44cc-9c7c-e9e686ca8569&channel=fca71be5-fc0c-45db-96af-f513e9abda9d&openTenderCode=GDJY251013001FG046&channelName=%E9%87%87%E8%B4%AD%E9%A1%B9%E7%9B%AE%E4%BF%A1%E6%81%AF,2025年广东省学生体质健康抽测项目[项目编号：GDJY251013001FG046]招标公告,2025/10/17
 https://gdgpo.czt.gd.gov.cn/maincms-web/noticeGd?type=notice&id=d454aeed-b516-4aae-a6c4-e6bcbc7c8d67&channel=fca71be5-fc0c-45db-96af-f513e9abda9d&openTenderCode=GDJY250320004FG006&channelName=%E9%87%87%E8%B4%AD%E9%A1%B9%E7%9B%AE%E4%BF%A1%E6%81%AF,广东省教育厅广东省校园安全管理中心日常保障服务项目的合同公告,2025/10/16
 https://gdgpo.czt.gd.gov.cn/maincms-web/noticeGd?type=notice&id=971c21d3-21bb-47ee-870b-1ddd12fdc18e&channel=fca71be5-fc0c-45db-96af-f513e9abda9d&openTenderCode=GPCGD251156FG300F&channelName=%E9%87%87%E8%B4%AD%E9%A1%B9%E7%9B%AE%E4%BF%A1%E6%81%AF,省教育厅安全服务（2025年）项目招标公告,2025/10/14
-https://gdgpo.czt.gd.gov.cn/maincms-web/noticeGd?type=notice&id=971c21d3-21bb-47ee-870b-1ddd12fdc18e&channel=fca71be5-fc0c-45db-96af-f513e9abda9d&openTenderCode=GPCGD251156FG300F&channelName=%E9%87%87%E8%B4%AD%E9%A1%B9%E7%9B%AE%E4%BF%A1%E6%81%AF,省教育厅安全服务（2025年）项目招标公告,2025/10/14
 https://gdgpo.czt.gd.gov.cn/maincms-web/noticeGd?type=notice&id=e7b0b8fd-9f31-4e95-a69e-e15978435f30&channel=fca71be5-fc0c-45db-96af-f513e9abda9d&openTenderCode=GPCGD251156FG301F&channelName=%E9%87%87%E8%B4%AD%E9%A1%B9%E7%9B%AE%E4%BF%A1%E6%81%AF,省教育厅政务信息化运维服务（2025年）项目采购更正公告（第一次）,2025/10/12
 https://gdgpo.czt.gd.gov.cn/maincms-web/articleRedHeadGd?id=c033e2a6-4d65-44f0-b770-8e437fe569e1&channelName=%E9%87%87%E8%B4%AD%E8%AE%A1%E5%88%92%E6%A8%A1%E6%9D%BF,广东省教育厅教育科研网接入服务（2025年）项目,2025/10/1
 https://gdgpo.czt.gd.gov.cn/maincms-web/noticeGd?type=notice&id=5e456046-1b31-4592-8b0d-69ccdac43d94&channel=fca71be5-fc0c-45db-96af-f513e9abda9d&openTenderCode=4188-2541GDG32711&channelName=%E9%87%87%E8%B4%AD%E9%A1%B9%E7%9B%AE%E4%BF%A1%E6%81%AF,广东省教育专网服务（2025年）项目招标公告,2025/9/27
@@ -68,7 +69,9 @@ https://edu.gd.gov.cn/zwgknew/zbcg/content/post_4436912.html,2024年“暑假安
 https://edu.gd.gov.cn/zwgknew/zbcg/content/post_3451398.html,广东省教育厅印发《广东省教育厅关于省直教育系统政府采购负面清单》的通知,2021/8/4
 """
 prompt = """
-你是一个招标助手，擅长分析采购意向通知的内容。
+你是一个投标助手，你的人物是对甲方发布的招标内容进行分析。
+我方实力特点如下：
+行业：软件开发
 """
 
 agent = ReActAgent(
@@ -84,11 +87,11 @@ agent = ReActAgent(
 
 def agent_main(user_id: str, user_message: str, reply_hook: callable):
     # 模拟爬取发布的数据
-    df = pd.read_csv(data)
+    df = pd.read_csv(io.BufferedReader(io.BytesIO(data.encode('utf-8'))))
 
     for artical_url, title, date in df.values:
         # 对于采购意向进行分析解读
-        if '意向' in title or '招标公告' in title:
+        if '招标公告' in title:
             reply_hook(f"开始对《{title}》进行分析解读...")
             url_parts = artical_url.split('?')
             if len(url_parts) > 1:
@@ -110,6 +113,9 @@ def agent_main(user_id: str, user_message: str, reply_hook: callable):
             content_html = BeautifulSoup(content, 'html.parser')
             # 获取<div class="noticeArea">标签内的内容
             main_content = content_html.find('div', class_='noticeArea')
-            
+            if not main_content:
+                main_content = content_html.find('div', id='noticeArea')
+            main_text = re.sub(r'\n\n+', '\n', main_content.text)
             # 对内容进行分析
-
+            coze.chat(f"标题：{title}\n正文：{main_text}")
+            reply_hook("分析完成，已记录至表格")
