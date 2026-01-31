@@ -57,12 +57,20 @@ class WxampRequestView(View):
                 logger.info(f"收到公众号后台的事件：{event}")
                 # 菜单点击事件
                 if event == 'CLICK':
-                    event_key = xmlMsg.find('EventKey').text
-                    # 查看所有待办日程的网页
-                    
-            else:
-                # print(f"收到用户[{user_id}]的消息：{xmlMsg.find('Content').text}, 回复一个空消息")
+                    menu_key = xmlMsg.find('EventKey').text
+                    if menu_key == 'KEY_PROJASSISTANT':
+                        # 标书助理
+                        reply_msg['Content'] = '已切换为标书助理模式'
+                    elif menu_key == 'KEY_SUPERSECRETARY':
+                        # 超级秘书
+                        reply_msg['Content'] = '已切换为超级秘书模式'
+                    else:
+                        # 查看所有待办日程的网页
+                        pass
+            elif msg_type == 'text':
                 handle_wxmessage_async(user_id, xmlMsg.find('Content').text)
+            else:
+                logger.info(f"收到用户[{user_id}]的消息：{xmlMsg}")
 
         return HttpResponse(self.message_to_xml(reply_msg).encode('utf-8'))
 
