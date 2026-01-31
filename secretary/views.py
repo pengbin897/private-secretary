@@ -50,7 +50,7 @@ class WxampRequestView(View):
         # 判断用户是否合法用户，再根据用户的功能模式进行对应的处理
         if not UserManageAccount.objects.filter(wx_openid=user_id).exists():
             reply_msg['Content'] = '您不是合法用户，可以联系法师（CyberMaster119）为您开通使用权限'
-            logging.warning(f"用户：\"{user_id}\" 还不是合法用户")
+            logger.warning(f"用户：\"{user_id}\" 还不是合法用户")
         else:
             if msg_type == 'event':
                 event = xmlMsg.find('Event').text
