@@ -85,7 +85,7 @@ agent = ReActAgent(
     formatter=DashScopeChatFormatter(),
 )
 
-def agent_main(user_id: str, user_message: str, reply_hook: callable):
+async def agent_main(user_id: str, user_message: str, reply_hook: callable):
     # 模拟爬取发布的数据
     df = pd.read_csv(io.BufferedReader(io.BytesIO(data.encode('utf-8'))))
 
