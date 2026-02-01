@@ -119,3 +119,5 @@ def agent_main(user_id: str, user_message: str, reply_hook: callable):
             # 对内容进行分析
             coze.chat(f"标题：{title}\n正文：{main_text}")
             reply_hook("分析完成，已记录至表格")
+    else:
+        reply_hook("所有文件分析完毕，请打开表格查看结果")
