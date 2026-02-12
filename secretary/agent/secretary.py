@@ -21,7 +21,7 @@ FEATURE_ANALYZER_PROMPT = f"""
 
 """
 
-def load_history_messages(user_id: int) -> list:
+def load_history_messages(user_id: int) -> list[Msg]:
     """
     加载用户的历史消息
     """
@@ -58,7 +58,7 @@ def save_history_messages(user_id: int, messages: list[Msg]):
     obj.history_messages = json.dumps(history_messages, ensure_ascii=False)
     obj.save()
 
-def agent_main(user_id: int, user_message: str, reply_hook: callable):
+async def agent_main(user_id: int, user_message: str, reply_hook: callable):
     def add_schedule(content: str, urgency_grade: int, fire_time: datetime) -> ToolResponse:
         """
         添加一条待办日程
@@ -114,7 +114,7 @@ def agent_main(user_id: int, user_message: str, reply_hook: callable):
     # )
     memory = InMemoryMemory()
     # 将对话历史放到memory里
-    memory.add(load_history_messages(user_id))
+    await memory.add(load_history_messages(user_id))
     # 再根据特征分析结果进行后续的对话
     recorder = ReActAgent(
         name="recorder",
@@ -125,8 +125,8 @@ def agent_main(user_id: int, user_message: str, reply_hook: callable):
         toolkit=toolkit
     )
     msg = Msg(name=user_id, role="user", content=user_message)
-    # reply = await recorder(msg)
-    reply = asyncio.run(recorder(msg))
+    reply = await recorder(msg)
+    # reply = asyncio.run(recorder(msg))
     reply_hook(reply.get_text_content())
     save_history_messages(user_id, [msg, reply])
 
