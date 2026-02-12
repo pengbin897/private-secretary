@@ -73,17 +73,17 @@ class WxampRequestView(View):
                 def reply_hook(reply_content):
                     send_message_to_user(user_openid, reply_content)
                     
-                def handle_wxmessage_async(message_content):
-                    def handle_wxmessage():
-                        loop = asyncio.new_event_loop()
-                        asyncio.set_event_loop(loop)
-                        try:
-                            loop.run_in_executor(secretary_aget(user_id, message_content, reply_hook))
-                        finally:
-                            loop.close()
-                    threading.Thread(target=handle_wxmessage).start()
-
-                handle_wxmessage_async(xmlMsg.find('Content').text)
+                # def handle_wxmessage_async(message_content):
+                #     def handle_wxmessage():
+                #         loop = asyncio.new_event_loop()
+                #         asyncio.set_event_loop(loop)
+                #         try:
+                #             loop.run_in_executor(None, lambda: secretary_aget(user_id, message_content, reply_hook))
+                #         finally:
+                #             loop.close()
+                #     threading.Thread(target=handle_wxmessage).start()
+                # handle_wxmessage_async(xmlMsg.find('Content').text)
+                threading.Thread(target=secretary_aget, args=(user_id, xmlMsg.find('Content').text, reply_hook)).start()
             else:
                 logger.info(f"收到用户[{user_openid}]的消息：{xmlMsg}")
 
