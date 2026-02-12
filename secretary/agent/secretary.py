@@ -72,6 +72,7 @@ async def agent_call(llm, history_messages, tools, query):
         toolkit=tools
     )
     reply = await recorder(query)
+    return reply
 
 
 def agent_main(user_id: int, user_message: str, reply_hook: callable):
@@ -121,8 +122,8 @@ def agent_main(user_id: int, user_message: str, reply_hook: callable):
     toolkit.register_tool_function(get_schedule_list)
 
     history_messages = load_history_messages(user_id)
-    user_message = Msg(user_id, user_message, "user")
-    reply = asyncio.run(agent_call(llm, history_messages, toolkit, user_message))
+    query = Msg(user_id, user_message, "user")
+    reply = asyncio.run(agent_call(llm, history_messages, toolkit, query))
 
     # 先通过记忆库对用户进行特征分析及更新
     # feature_analyzer = ReActAgent(
@@ -132,7 +133,6 @@ def agent_main(user_id: int, user_message: str, reply_hook: callable):
     #     formatter=OpenAIChatFormatter(),
     #     memory=memory,
     # )
-    # reply = asyncio.run(recorder(msg))
     reply_hook(reply.get_text_content())
     save_history_messages(user_id, [user_message, reply])
 
