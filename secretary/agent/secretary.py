@@ -32,7 +32,7 @@ def load_history_messages(user_id: int) -> list[Msg]:
     if not character_tracks.history_messages:
         return []
 
-    return [Msg(user_id, message['content'], message['role']) for message in json.loads(character_tracks.history_messages)]
+    return [Msg(message['name'], message['content'], message['role']) for message in json.loads(character_tracks.history_messages)]
 
 def save_history_messages(user_id: int, messages: list[Msg]):
     """
@@ -53,7 +53,7 @@ def save_history_messages(user_id: int, messages: list[Msg]):
         except (TypeError, json.JSONDecodeError):
             history_messages = []  # 容错：如果字段不是合法 JSON，重置为空列表
 
-    history_messages.extend([{"role": message.role, "content": message.content} for message in messages])
+    history_messages.extend([{"name": message.name, "role": message.role, "content": message.content} for message in messages])
     # 保存回数据库
     obj.history_messages = json.dumps(history_messages, ensure_ascii=False)
     obj.save()
