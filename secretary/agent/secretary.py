@@ -99,7 +99,7 @@ def agent_main(user_id: int, user_message: str, reply_hook: callable):
         """
         查询用户所有日程列表
         """
-        schedules = UserSchedule.objects.filter(owner_id=user_id).order_by('-fire_time')
+        schedules = await UserSchedule.objects.filter(owner_id=user_id).order_by('-fire_time')
         schedule_list = []
         for schedule in schedules:
             schedule_list.append({
