@@ -20,7 +20,6 @@ RECORDER_PROMPT = f"""
 FEATURE_ANALYZER_PROMPT = f"""
 
 """
-memory = InMemoryMemory()
 
 def load_history_messages(user_id: int) -> list:
     """
@@ -32,9 +31,10 @@ def load_history_messages(user_id: int) -> list:
         return []
     if not character_tracks.history_messages:
         return []
-    return json.loads(character_tracks.history_messages)
 
-def save_history_messages(user_id: int, history_messages: list):
+    return [Msg(user_id, message['content'], message['role']) for message in json.loads(character_tracks.history_messages)]
+
+def save_history_messages(user_id: int, messages: list[Msg]):
     """
     保存用户的历史消息
     """
@@ -46,16 +46,16 @@ def save_history_messages(user_id: int, history_messages: list):
 
     # 解析现有消息
     if created:
-        messages = []
+        history_messages = []
     else:
         try:
-            messages = json.loads(obj.history_messages)
+            history_messages = json.loads(obj.history_messages)
         except (TypeError, json.JSONDecodeError):
-            messages = []  # 容错：如果字段不是合法 JSON，重置为空列表
+            history_messages = []  # 容错：如果字段不是合法 JSON，重置为空列表
 
-    messages.extend(history_messages)
+    history_messages.extend([(message.role, message.content) for message in messages])
     # 保存回数据库
-    obj.history_messages = json.dumps(messages, ensure_ascii=False)
+    obj.history_messages = json.dumps(history_messages, ensure_ascii=False)
     obj.save()
 
 async def agent_main(user_id: int, user_message: str, reply_hook: callable):
@@ -105,14 +105,16 @@ async def agent_main(user_id: int, user_message: str, reply_hook: callable):
     toolkit.register_tool_function(get_schedule_list)
 
     # 先通过记忆库对用户进行特征分析及更新
-    feature_analyzer = ReActAgent(
-        name="feature_analyzer",
-        model=llm,
-        sys_prompt=FEATURE_ANALYZER_PROMPT,
-        formatter=OpenAIChatFormatter(),
-        memory=memory,
-    )
-
+    # feature_analyzer = ReActAgent(
+    #     name="feature_analyzer",
+    #     model=llm,
+    #     sys_prompt=FEATURE_ANALYZER_PROMPT,
+    #     formatter=OpenAIChatFormatter(),
+    #     memory=memory,
+    # )
+    memory = InMemoryMemory()
+    # 将对话历史放到memory里
+    memory.add(load_history_messages(user_id))
     # 再根据特征分析结果进行后续的对话
     recorder = ReActAgent(
         name="recorder",
@@ -125,4 +127,5 @@ async def agent_main(user_id: int, user_message: str, reply_hook: callable):
     msg = Msg(name=user_id, role="user", content=user_message)
     reply = await recorder(msg)
     reply_hook(reply.get_text_content())
+    save_history_messages(user_id, [msg, reply])
 
