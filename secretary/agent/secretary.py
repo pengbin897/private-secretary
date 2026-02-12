@@ -76,7 +76,7 @@ def save_history_messages(user_id: int, messages: list[Msg]):
 
 
 def agent_main(user_id: int, user_message: str, reply_hook: callable):
-    def add_schedule(content: str, urgency_grade: int, fire_time: datetime) -> ToolResponse:
+    async def add_schedule(content: str, urgency_grade: int, fire_time: datetime) -> ToolResponse:
         """
         添加一条待办日程
         Args:
@@ -84,7 +84,7 @@ def agent_main(user_id: int, user_message: str, reply_hook: callable):
             urgency_grade(int): {紧急程度，1:低，2:中，3:高}
             fire_time(datetime): {事项设定的触发时间}
         """
-        UserSchedule.objects.create(
+        await UserSchedule.objects.acreate(
             owner_id=user_id,
             content=content,
             urgency_grade=urgency_grade,
@@ -95,7 +95,7 @@ def agent_main(user_id: int, user_message: str, reply_hook: callable):
             content=f"已添加一条日程信息：{content}，触发时间：{fire_time}"
         )
 
-    def get_schedule_list() -> ToolResponse:
+    async def get_schedule_list() -> ToolResponse:
         """
         查询用户所有日程列表
         """
