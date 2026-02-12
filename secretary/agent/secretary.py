@@ -58,21 +58,21 @@ def save_history_messages(user_id: int, messages: list[Msg]):
     obj.history_messages = json.dumps(history_messages, ensure_ascii=False)
     obj.save()
 
-async def agent_call(llm, history_messages, tools, query):
-    memory = InMemoryMemory()
-    # 将对话历史放到memory里
-    await memory.add(history_messages)
-    # 再根据特征分析结果进行后续的对话
-    recorder = ReActAgent(
-        name="recorder",
-        model=llm,
-        sys_prompt=RECORDER_PROMPT,
-        formatter=OpenAIChatFormatter(),
-        memory=memory,
-        toolkit=tools
-    )
-    reply = await recorder(query)
-    return reply
+# async def agent_call(llm, history_messages, tools, query):
+#     memory = InMemoryMemory()
+#     # 将对话历史放到memory里
+#     await memory.add(history_messages)
+#     # 再根据特征分析结果进行后续的对话
+#     recorder = ReActAgent(
+#         name="recorder",
+#         model=llm,
+#         sys_prompt=RECORDER_PROMPT,
+#         formatter=OpenAIChatFormatter(),
+#         memory=memory,
+#         toolkit=tools
+#     )
+#     reply = await recorder(query)
+#     return reply
 
 
 def agent_main(user_id: int, user_message: str, reply_hook: callable):
@@ -122,8 +122,6 @@ def agent_main(user_id: int, user_message: str, reply_hook: callable):
     toolkit.register_tool_function(get_schedule_list)
 
     history_messages = load_history_messages(user_id)
-    query = Msg(user_id, user_message, "user")
-    reply = asyncio.run(agent_call(llm, history_messages, toolkit, query))
 
     # 先通过记忆库对用户进行特征分析及更新
     # feature_analyzer = ReActAgent(
@@ -133,6 +131,20 @@ def agent_main(user_id: int, user_message: str, reply_hook: callable):
     #     formatter=OpenAIChatFormatter(),
     #     memory=memory,
     # )
+    memory = InMemoryMemory()
+    # 将对话历史放到memory里
+    asyncio.run(memory.add(history_messages))
+    # 再根据特征分析结果进行后续的对话
+    recorder = ReActAgent(
+        name="recorder",
+        model=llm,
+        sys_prompt=RECORDER_PROMPT,
+        formatter=OpenAIChatFormatter(),
+        memory=memory,
+        toolkit=toolkit
+    )
+    query = Msg(f"user_{user_id}", user_message, "user")
+    reply = asyncio.run(recorder(query))
     reply_hook(reply.get_text_content())
-    save_history_messages(user_id, [user_message, reply])
+    save_history_messages(user_id, [query, reply])
 
