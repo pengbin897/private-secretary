@@ -15,17 +15,15 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework import status
 
-from system.infra.common.constant import UserChannel
-from superadmin.models import UserManageAccount
+from system.common.constant import UserChannel
 from system.infra.adaptor.implatform.wechat import wxjsdk, miniprogram
-from superadmin.services import account
+from system.common.strategy import register_user
+from system.models import UserManageAccount
 
 
 logger = logging.getLogger(__name__)
 
 class MockLoginView(TokenObtainPairView):
-    authentication_classes = []
-    permission_classes = []
     def post(self, request: Request, *args, **kwargs) -> Response:
         """
         开发环境模拟登录接口
@@ -51,8 +49,6 @@ class MockLoginView(TokenObtainPairView):
         }) 
 
 class UsernamePasswordLoginView(TokenObtainPairView):
-    authentication_classes = []
-    permission_classes = []
     ''' 用户名密码登录 '''
     def post(self, request: Request, *args, **kwargs) -> Response:
         # 调用父类的post方法获取token
@@ -107,7 +103,6 @@ class RefreshTokenView(TokenRefreshView):
                 response.data = response_data
         
         return response
-
 
 class WechatAuthLoginView(APIView):
     ''' 微信H5授权登录 '''
@@ -168,7 +163,7 @@ class WechatAuthLoginView(APIView):
                 first_login = False
             else:
                 # 新用户注册
-                user_account = account.register_user(
+                user_account = register_user(
                     'lguser' + str(user_info['openid']),
                     UserChannel.WECHAT_H5,
                     token,
@@ -213,7 +208,7 @@ class WxMiniprogramLoginView(APIView):
             first_login = False
         else:
             # 先创建系统用户，再创建用户账户
-            user_account = account.register_user(
+            user_account = register_user(
                 'lguser' + str(user_state['openid']),
                 UserChannel.WECHAT_MINI_PROGRAM,
                 token,
@@ -270,5 +265,28 @@ class LogoutView(APIView):
                 'error': '登出过程中发生错误'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+# class UserRechargeView(APIView):
+#     ''' 用户充值 '''
+#     def post(self, request: Request) -> Response:
+#         user = request.user
+#         amount = request.data.get('amount')
+#         user_account = UserManageAccount.objects.filter(user__id=user.id).get()
+#         if not user_account.wx_openid:
+#             return Response({'code': 400, 'message': '请先绑定微信'})
+#         # 根据用户ID、时间戳生成一个随机数的订单编号，尽可能保证唯一
+#         order_no = f'LGTOOL{int(time.time())}{random.randint(1000, 9999)}'
+#         # 根据用户判断是公众号还是小程序下单
+#         if user_account.channel == UserChannel.WECHAT_H5:
+#             trade = wxampservice.create_pay_order('自助充值', order_no, amount, user_account.wx_openid)
+#         elif user_account.channel == UserChannel.WECHAT_MINI_PROGRAM:
+#             trade = wxmpservice.create_pay_order('自助充值', order_no, amount, user_account.wx_openid)
+#         else:
+#             return Response({'message': '支付方式错误'}, status.HTTP_400_BAD_REQUEST)
+#         if not trade:
+#             return Response({'message': '支付订单创建失败'}, status.HTTP_503_SERVICE_UNAVAILABLE)
+#         # 记录订单信息
+#         # UserOrder.objects.create(owner=user, order_no=order_no, amount=amount, trade_no=trade['prepay_id'], payer=user_account.wx_openid)
+#         return Response(trade)
 
 

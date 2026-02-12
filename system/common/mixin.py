@@ -2,7 +2,7 @@
 from django.db import models
 from django.forms.models import model_to_dict
 
-from superadmin.models import UserManageAccount
+from system.models import UserManageAccount
 
 
 class TenantModelMixin(models.Model):

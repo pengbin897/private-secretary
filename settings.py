@@ -5,11 +5,17 @@ from datetime import timedelta
 
 load_dotenv()
 
+# 开发环境设置
+DEBUG = True
+
 ALLOWED_HOSTS = ['*']
 
 ROOT_URLCONF = 'system.urls'
 
 SECRET_KEY = 'pengbin119'
+
+# 项目根目录
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 INSTALLED_APPS = [
     'django.contrib.auth',
@@ -22,7 +28,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
 
     'system',      # 处理应用请求的后端
-    'superadmin',  # 后台管理控制台
     'secretary',
 ]
 
@@ -40,7 +45,9 @@ DATABASES = {
     }
 }
 
-STATIC_URL = '/admin-static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = []
 
 MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
@@ -118,11 +125,9 @@ LOGGING = {
     'loggers': {
         'django.db.backends': {
             'handlers': ['console', 'file'],
-            'level': 'DEBUG' if os.environ.get('DEV_MODE') else 'INFO',
         },
         'secretary': {
             'handlers': ['console', 'file'],
-            'level': 'DEBUG' if os.environ.get('DEV_MODE') else 'INFO',
         },
     },
 }

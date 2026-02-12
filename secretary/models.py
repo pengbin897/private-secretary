@@ -1,6 +1,6 @@
 from django.db import models
 
-from system.infra.common.mixin import TenantModelMixin
+from system.common.mixin import TenantModelMixin
 
 
 class UserSchedule(TenantModelMixin):
@@ -21,4 +21,12 @@ class UserSchedule(TenantModelMixin):
     fire_time = models.DateTimeField(verbose_name='触发时间')
     status = models.IntegerField(verbose_name='状态', choices=Status.choices, default=Status.PENDING)
 
+
+class CharacterTracks(TenantModelMixin):
+    history_messages = models.TextField(verbose_name='历史消息')
+    character_summary = models.TextField(verbose_name='对用户特征的详细总结')
+
+    class Meta:
+        verbose_name = '基于对话历史记录形成的对用户特征、记忆点的描述'
+        verbose_name_plural = '用户特征的形成轨迹'
 

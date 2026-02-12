@@ -1,3 +1,3 @@
-from .settings import *
-from .user import *
+from .user_login import *
+from .user_settings import *
 from .wxapi import *

@@ -9,9 +9,9 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from system.infra.common.constant import UserChannel
+from system.common.constant import UserChannel
 from system.infra.adaptor.implatform.wechat import wxjsdk
-from superadmin.models import UserManageAccount
+from system.models import UserManageAccount
 
 
 logger = logging.getLogger(__name__)
