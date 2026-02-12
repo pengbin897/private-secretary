@@ -6,6 +6,7 @@ from agentscope.model import OpenAIChatModel
 from agentscope.memory import InMemoryMemory
 from agentscope.formatter import OpenAIChatFormatter
 from agentscope.tool import Toolkit, ToolResponse
+from django.db.models import F
 
 from secretary.models import UserSchedule, CharacterTracks
 
@@ -99,16 +100,16 @@ def agent_main(user_id: int, user_message: str, reply_hook: callable):
         """
         查询用户所有日程列表
         """
-        schedules = await UserSchedule.objects.filter(owner_id=user_id).order_by('-fire_time')
+        schedules = UserSchedule.objects.filter(owner_id=user_id).order_by('-fire_time')
         schedule_list = []
-        for schedule in schedules:
+        async for schedule in schedules:
             schedule_list.append({
                 'id': schedule.id,
                 'content': schedule.content,
                 'fire_time': schedule.fire_time,
             })
         return ToolResponse(
-            content=json.dumps(schedule_list)
+            content=json.dumps(schedule_list, ensure_ascii=False)
         )
 
     llm = OpenAIChatModel(
