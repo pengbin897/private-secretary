@@ -58,7 +58,23 @@ def save_history_messages(user_id: int, messages: list[Msg]):
     obj.history_messages = json.dumps(history_messages, ensure_ascii=False)
     obj.save()
 
-async def agent_main(user_id: int, user_message: str, reply_hook: callable):
+async def agent_call(llm, history_messages, tools, query):
+    memory = InMemoryMemory()
+    # 将对话历史放到memory里
+    await memory.add(history_messages)
+    # 再根据特征分析结果进行后续的对话
+    recorder = ReActAgent(
+        name="recorder",
+        model=llm,
+        sys_prompt=RECORDER_PROMPT,
+        formatter=OpenAIChatFormatter(),
+        memory=memory,
+        toolkit=tools
+    )
+    reply = await recorder(query)
+
+
+def agent_main(user_id: int, user_message: str, reply_hook: callable):
     def add_schedule(content: str, urgency_grade: int, fire_time: datetime) -> ToolResponse:
         """
         添加一条待办日程
@@ -104,6 +120,10 @@ async def agent_main(user_id: int, user_message: str, reply_hook: callable):
     toolkit.register_tool_function(add_schedule)
     toolkit.register_tool_function(get_schedule_list)
 
+    history_messages = load_history_messages(user_id)
+    user_message = Msg(user_id, user_message, "user")
+    reply = asyncio.run(agent_call(llm, history_messages, toolkit, user_message))
+
     # 先通过记忆库对用户进行特征分析及更新
     # feature_analyzer = ReActAgent(
     #     name="feature_analyzer",
@@ -112,21 +132,7 @@ async def agent_main(user_id: int, user_message: str, reply_hook: callable):
     #     formatter=OpenAIChatFormatter(),
     #     memory=memory,
     # )
-    memory = InMemoryMemory()
-    # 将对话历史放到memory里
-    await memory.add(load_history_messages(user_id))
-    # 再根据特征分析结果进行后续的对话
-    recorder = ReActAgent(
-        name="recorder",
-        model=llm,
-        sys_prompt=RECORDER_PROMPT,
-        formatter=OpenAIChatFormatter(),
-        memory=memory,
-        toolkit=toolkit
-    )
-    msg = Msg(name=user_id, role="user", content=user_message)
-    reply = await recorder(msg)
     # reply = asyncio.run(recorder(msg))
     reply_hook(reply.get_text_content())
-    save_history_messages(user_id, [msg, reply])
+    save_history_messages(user_id, [user_message, reply])
 
