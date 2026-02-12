@@ -1,4 +1,4 @@
-import os, logging, json
+import os, logging, json, asyncio
 from datetime import datetime
 from agentscope.agent import ReActAgent
 from agentscope.message import Msg
@@ -58,7 +58,7 @@ def save_history_messages(user_id: int, messages: list[Msg]):
     obj.history_messages = json.dumps(history_messages, ensure_ascii=False)
     obj.save()
 
-async def agent_main(user_id: int, user_message: str, reply_hook: callable):
+def agent_main(user_id: int, user_message: str, reply_hook: callable):
     def add_schedule(content: str, urgency_grade: int, fire_time: datetime) -> ToolResponse:
         """
         添加一条待办日程
@@ -73,7 +73,7 @@ async def agent_main(user_id: int, user_message: str, reply_hook: callable):
             urgency_grade=urgency_grade,
             fire_time=fire_time
         )
-        print(f"给用户ID[{user_id}]添加一条日程信息：{content}，触发时间：{fire_time}")
+        logger.debug(f"给用户ID[{user_id}]添加一条日程信息：{content}，触发时间：{fire_time}")
         return ToolResponse(
             content=f"已添加一条日程信息：{content}，触发时间：{fire_time}"
         )
@@ -125,7 +125,8 @@ async def agent_main(user_id: int, user_message: str, reply_hook: callable):
         toolkit=toolkit
     )
     msg = Msg(name=user_id, role="user", content=user_message)
-    reply = await recorder(msg)
+    # reply = await recorder(msg)
+    reply = asyncio.run(recorder(msg))
     reply_hook(reply.get_text_content())
     save_history_messages(user_id, [msg, reply])
 
