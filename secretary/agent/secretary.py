@@ -106,7 +106,7 @@ def agent_main(user_id: int, user_message: str, reply_hook: callable):
             schedule_list.append({
                 'id': schedule.id,
                 'content': schedule.content,
-                'fire_time': schedule.fire_time,
+                'fire_time': schedule.fire_time.strftime('%Y-%m-%d %H:%M:%S'),
             })
         return ToolResponse(
             content=json.dumps(schedule_list, ensure_ascii=False)
