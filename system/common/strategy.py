@@ -16,9 +16,8 @@ def register_user(
         headimgurl: str=None,
         credential: str=None) -> User:
     ''' 用户首次注册 '''
-    user = User.objects.create_user(username=username, password=password)
+    user = User.objects.create_user(username, f"{username}@linkgeeks.com.cn", password)
     account = UserManageAccount.objects.create(
-        pk=user.pk,
         wx_openid=openid,
         wx_unionid=unionid,
         user_id=user.pk,

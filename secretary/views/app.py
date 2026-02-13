@@ -26,7 +26,6 @@ class WxampRequestView(View):
         nonce = request.GET.get("nonce")
         timestamp = request.GET.get("timestamp")
         echostr = request.GET.get("echostr")
-        openid = request.GET.get("openid")
 
         # 获取请求body中的数据
         raw_data = request.body.decode('utf-8')

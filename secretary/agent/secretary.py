@@ -59,22 +59,6 @@ def save_history_messages(user_id: int, messages: list[Msg]):
     obj.history_messages = json.dumps(history_messages, ensure_ascii=False)
     obj.save()
 
-# async def agent_call(llm, history_messages, tools, query):
-#     memory = InMemoryMemory()
-#     # 将对话历史放到memory里
-#     await memory.add(history_messages)
-#     # 再根据特征分析结果进行后续的对话
-#     recorder = ReActAgent(
-#         name="recorder",
-#         model=llm,
-#         sys_prompt=RECORDER_PROMPT,
-#         formatter=OpenAIChatFormatter(),
-#         memory=memory,
-#         toolkit=tools
-#     )
-#     reply = await recorder(query)
-#     return reply
-
 
 def agent_main(user_id: int, user_message: str, reply_hook: callable):
     async def add_schedule(content: str, urgency_grade: int, fire_time: datetime) -> ToolResponse:
@@ -106,6 +90,8 @@ def agent_main(user_id: int, user_message: str, reply_hook: callable):
             schedule_list.append({
                 'id': schedule.id,
                 'content': schedule.content,
+                'urgency_grade': schedule.urgency_grade,
+                'categories': schedule.categories,
                 'fire_time': schedule.fire_time.strftime('%Y-%m-%d %H:%M:%S'),
             })
         return ToolResponse(
@@ -133,8 +119,8 @@ def agent_main(user_id: int, user_message: str, reply_hook: callable):
     #     memory=memory,
     # )
     memory = InMemoryMemory()
-    # 将对话历史放到memory里
-    asyncio.run(memory.add(history_messages))
+    # 将对话历史放到memory里，设置一个最大历史记录条数的上限
+    asyncio.run(memory.add(history_messages[-10:]))
     # 再根据特征分析结果进行后续的对话
     recorder = ReActAgent(
         name="recorder",
