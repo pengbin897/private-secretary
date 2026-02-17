@@ -27,8 +27,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
 
-    'system',      # 处理应用请求的后端
+    'lgsys.system',      # 处理应用请求的后端
     'secretary',
+    'console'
 ]
 
 DATABASES = {

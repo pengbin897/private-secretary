@@ -8,7 +8,7 @@ mysqlclient>=2.0.1
 cnlunar
 pycryptodome
 alibabacloud-oss-v2
-langextract
+git+https://gitee.com/pengbin119/lgsys.git@main
 agentscope
 beautifulsoup4
 cozepy
